@@ -4,6 +4,7 @@ defmodule Deparam do
   """
 
   alias Deparam.Coercer
+  alias Deparam.DeepMapGet
   alias Deparam.InvalidParamError
 
   @typedoc """
@@ -17,9 +18,14 @@ defmodule Deparam do
   @type key :: atom | String.t()
 
   @typedoc """
+  A type describing a keypath.
+  """
+  @type path :: nonempty_list(key)
+
+  @typedoc """
   A type describing a param key path.
   """
-  @type key_or_path :: key | nonempty_list(key)
+  @type key_or_path :: key | path
 
   @typedoc """
   A type representing a the primitive data type for a parameter key or value.
@@ -109,7 +115,7 @@ defmodule Deparam do
           {:ok, any} | {:error, InvalidParamError.t()}
   def fetch(params, key_or_path, type \\ :any, opts \\ []) do
     path = resolve_path(key_or_path)
-    value = deep_map_get(params, path)
+    value = DeepMapGet.deep_map_get(params, path)
 
     case Coercer.coerce(value, type) do
       {:ok, nil} ->
@@ -122,14 +128,6 @@ defmodule Deparam do
         {:error, %InvalidParamError{path: path, value: value, type: type}}
     end
   end
-
-  defp deep_map_get(map, [key | rest_path]) when is_map(map) do
-    deep_map_get(map[key], rest_path)
-  end
-
-  defp deep_map_get(value, []), do: value
-
-  defp deep_map_get(_value, _path), do: nil
 
   defp resolve_path(key_or_path) do
     key_or_path |> List.wrap() |> Enum.map(&to_string/1)

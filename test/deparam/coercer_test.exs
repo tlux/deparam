@@ -43,6 +43,9 @@ defmodule Deparam.CoercerTest do
       assert Coercer.coerce("https://test.com", :url) ==
                {:ok, "https://test.com"}
 
+      assert Coercer.coerce("https://test.com", {:non_empty, :url}) ==
+               {:ok, "https://test.com"}
+
       assert Coercer.coerce("ftp://test.com", :url) == :error
     end
 
@@ -278,6 +281,11 @@ defmodule Deparam.CoercerTest do
       assert Coercer.coerce("2", coercer) == {:ok, false}
       assert Coercer.coerce("3", coercer) == :error
       assert Coercer.coerce([], coercer) == :error
+    end
+
+    test "custom coercer" do
+      assert Coercer.coerce("foo", Deparam.TestCoercer) == {:ok, "FOO"}
+      assert Coercer.coerce("bar", Deparam.TestCoercer) == :error
     end
   end
 end

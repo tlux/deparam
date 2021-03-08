@@ -1,6 +1,11 @@
 defmodule Deparam.Coercer do
-  @moduledoc false
+  @moduledoc """
+  A behavior that can be used to implement a custom coercer.
+  """
 
+  @callback coerce(value :: any) :: {:ok, any} | :error
+
+  @doc false
   @spec coerce(any, atom | tuple | (any -> {:ok, any} | :error)) ::
           {:ok, any} | :error
   def coerce(value, {:non_nil, inner_type}) do
@@ -203,6 +208,14 @@ defmodule Deparam.Coercer do
 
   def coerce(value, {:non_empty, inner_type}) do
     coerce(value, {:non_nil, inner_type})
+  end
+
+  def coerce(value, type) when is_atom(type) do
+    if Code.ensure_loaded?(type) && function_exported?(type, :coerce, 1) do
+      type.coerce(value)
+    else
+      :error
+    end
   end
 
   def coerce(_value, _type), do: :error
