@@ -6,10 +6,11 @@ defmodule Deparam.Type do
   alias Deparam.TypeContext
   alias Deparam.Types
 
-  @callback coerce(value :: any, context :: Deparam.TypeContext.t()) ::
+  @callback coerce(value :: any, context :: TypeContext.t()) ::
               {:ok, any} | :error
 
   @aliases %{
+    any: Types.Any,
     array: Types.Array,
     boolean: Types.Boolean,
     enum: Types.Enum,
@@ -19,24 +20,49 @@ defmodule Deparam.Type do
     string: Types.String
   }
 
+  @modifiers [:non_empty, :non_nil]
+
   @doc false
-  @spec resolve(atom | module | tuple) ::
-          {:ok, module, TypeContext.t()} | :error
-  def resolve({:non_empty, type}) do
-    resolve()
+  @spec resolve(any) :: {:ok, TypeContext.t()} | :error
+  def resolve(%TypeContext{} = context) do
+    {:ok, context}
   end
 
-  # def resolve(type) when is_tuple(type) do
+  def resolve({modifier, type}) when modifier in @modifiers do
+    with {:ok, context} <- resolve(type) do
+      {:ok, %{context | modifier: modifier}}
+    end
+  end
 
-  # end
+  def resolve(definition) when tuple_size(definition) >= 2 do
+    definition
+    |> Tuple.to_list()
+    |> resolve()
+  end
 
-  def resolve(type) do
-    type = Map.get(@aliases, type, type)
+  def resolve([type | args]) do
+    with {:ok, context} <- resolve(type) do
+      {:ok, %{context | args: args}}
+    end
+  end
 
-    if Code.ensure_loaded?(type) && function_exported?(type, :coerce, 2) do
-      {:ok, type, %TypeContext{}}
+  def resolve(type) when is_atom(type) do
+    mod = Map.get(@aliases, type, type)
+
+    if Code.ensure_loaded?(mod) && function_exported?(mod, :coerce, 2) do
+      {:ok, %TypeContext{mod: mod}}
     else
       :error
+    end
+  end
+
+  def resolve(_), do: :error
+
+  @spec coerce(any, any) :: {:ok, any} | :error
+  def coerce(type, value) do
+    with {:ok, context} <- resolve(type),
+         {:ok, value} <- context.mod.coerce(value, context) do
+      {:ok, value}
     end
   end
 end

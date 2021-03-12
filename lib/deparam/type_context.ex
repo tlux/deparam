@@ -1,5 +1,9 @@
 defmodule Deparam.TypeContext do
-  defstruct non_empty: false, args: []
+  defstruct [:mod, modifier: nil, args: []]
 
-  @type t :: %__MODULE__{non_empty: boolean, args: [any]}
+  @type t :: %__MODULE__{
+          mod: module,
+          modifier: nil | :non_nil | :non_empty,
+          args: [any]
+        }
 end
