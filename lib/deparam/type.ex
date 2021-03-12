@@ -58,6 +58,7 @@ defmodule Deparam.Type do
 
   def resolve(_), do: :error
 
+  @doc false
   @spec coerce(any, any) :: {:ok, any} | :error
   def coerce(type, value) do
     with {:ok, context} <- resolve(type),
