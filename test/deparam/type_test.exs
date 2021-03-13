@@ -164,6 +164,9 @@ defmodule Deparam.CoercerTest do
     end
 
     test "list" do
+      assert Type.coerce([666, "foo", nil], :array) ==
+               {:ok, [666, "foo", nil]}
+
       assert Type.coerce([666, "foo", nil], {:array, :string}) ==
                {:ok, ["666", "foo", nil]}
 
@@ -204,10 +207,10 @@ defmodule Deparam.CoercerTest do
                {:array, {:non_empty, :string}}
              ) == {:ok, nil}
 
-      assert Type.coerce(
-               "foo",
-               {:array, {:non_empty, :string}}
-             ) == {:ok, ["foo"]}
+      assert Type.coerce("foo", :array) == {:ok, ["foo"]}
+
+      assert Type.coerce("foo", {:array, {:non_empty, :string}}) ==
+               {:ok, ["foo"]}
     end
 
     test "word list" do
