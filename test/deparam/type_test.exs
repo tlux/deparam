@@ -286,7 +286,7 @@ defmodule Deparam.CoercerTest do
     test "arity-2 function" do
       coercer = fn
         "blank", %{modifier: :non_empty} -> :error
-        str, _ -> {:ok, str}
+        str, _ when is_binary(str) -> {:ok, str}
         _, _ -> :error
       end
 
@@ -295,6 +295,7 @@ defmodule Deparam.CoercerTest do
       assert Type.coerce("blank", {:non_empty, coercer}) == :error
       assert Type.coerce("present", coercer) == {:ok, "present"}
       assert Type.coerce("present", {:non_empty, coercer}) == {:ok, "present"}
+      assert Type.coerce(:invalid, coercer) == :error
     end
 
     test "custom coercer" do

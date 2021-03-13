@@ -18,7 +18,8 @@ defmodule Deparam.Type do
     integer: Types.Integer,
     map: Types.Map,
     string: Types.String,
-    word_list: Types.WordList
+    word_list: Types.WordList,
+    url: Types.URL
   }
 
   @modifiers [:non_empty, :non_nil]

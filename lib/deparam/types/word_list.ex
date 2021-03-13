@@ -1,11 +1,11 @@
 defmodule Deparam.Types.WordList do
   @behaviour Deparam.Type
 
-  alias Deparam.Types.Array
+  alias Deparam.Types.Array, as: ArrayType
 
   @impl true
   def coerce(list, context) when is_list(list) do
-    Array.coerce(list, context)
+    ArrayType.coerce(list, context)
   end
 
   def coerce(words, %{args: []} = context) when is_binary(words) do
