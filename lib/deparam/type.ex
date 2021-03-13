@@ -19,6 +19,7 @@ defmodule Deparam.Type do
     map: Types.Map,
     string: Types.String,
     word_list: Types.WordList,
+    upload: Types.Upload,
     url: Types.URL
   }
 
