@@ -22,8 +22,13 @@ defmodule Deparam.Type do
 
   @modifiers [:non_empty, :non_nil]
 
-  @doc false
+  @doc """
+  Translates the given type specification to a type context that can be passed
+  as argument to a coercer.
+  """
   @spec resolve(any) :: {:ok, TypeContext.t()} | :error
+  def resolve(nil), do: resolve(:any)
+
   def resolve(%TypeContext{} = context) do
     {:ok, context}
   end
@@ -58,12 +63,25 @@ defmodule Deparam.Type do
 
   def resolve(_), do: :error
 
-  @doc false
+  @doc """
+  Coerces the given value using the given type context or specification.
+  """
   @spec coerce(any, any) :: {:ok, any} | :error
-  def coerce(type, value) do
+  def coerce(value, type) do
     with {:ok, context} <- resolve(type),
-         {:ok, value} <- context.mod.coerce(value, context) do
+         {:ok, value} <- do_coerce(value, context) do
       {:ok, value}
     end
+  end
+
+  defp do_coerce(nil, %{modifier: modifier})
+       when modifier in [:non_nil, :non_empty] do
+    :error
+  end
+
+  defp do_coerce(nil, _), do: {:ok, nil}
+
+  defp do_coerce(value, context) do
+    context.mod.coerce(value, context)
   end
 end

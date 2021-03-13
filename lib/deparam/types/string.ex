@@ -2,10 +2,10 @@ defmodule Deparam.Types.String do
   @behaviour Deparam.Type
 
   @impl true
-  def coerce("", %{non_empty: true}), do: :error
+  def coerce("", %{modifier: :non_empty}), do: :error
 
-  def coerce(value, %{non_empty: true} = context) when is_binary(value) do
-    coerce(value, %{context | non_empty: false})
+  def coerce(value, %{modifier: :non_empty} = context) when is_binary(value) do
+    coerce(value, %{context | modifier: nil})
   end
 
   def coerce(value, _context) when is_binary(value) do

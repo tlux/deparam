@@ -284,8 +284,8 @@ defmodule Deparam.CoercerTest do
     end
 
     test "custom coercer" do
-      assert Type.coerce("foo", Deparam.TestCoercer) == {:ok, "FOO"}
-      assert Type.coerce("bar", Deparam.TestCoercer) == :error
+      assert Type.coerce("foo", Deparam.TestType) == {:ok, "FOO"}
+      assert Type.coerce("bar", Deparam.TestType) == :error
     end
   end
 end
