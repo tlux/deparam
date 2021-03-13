@@ -11,10 +11,10 @@ defmodule Deparam.Types.Map do
   end
 
   def coerce(map, %{args: [key_type, value_type]}) when is_map(map) do
-    Enum.reduce_while(map, {:ok, %{}}, fn {key, value}, {:ok, new_map} ->
-      with {:ok, mapped_key} <- Type.coerce(key_type, key),
-           {:ok, mapped_value} <- Type.coerce(value_type, value) do
-        {:cont, {:ok, Map.put(new_map, mapped_key, mapped_value)}}
+    Enum.reduce_while(map, {:ok, %{}}, fn {key, value}, {:ok, map} ->
+      with {:ok, key} <- Type.coerce(key, key_type),
+           {:ok, value} <- Type.coerce(value, value_type) do
+        {:cont, {:ok, Map.put(map, key, value)}}
       else
         _ -> {:halt, :error}
       end

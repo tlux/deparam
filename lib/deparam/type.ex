@@ -17,7 +17,8 @@ defmodule Deparam.Type do
     float: Types.Float,
     integer: Types.Integer,
     map: Types.Map,
-    string: Types.String
+    string: Types.String,
+    word_list: Types.WordList
   }
 
   @modifiers [:non_empty, :non_nil]

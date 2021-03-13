@@ -13,10 +13,10 @@ defmodule Deparam.Types.Array do
   def coerce(values, %{args: [element_type]}) when is_list(values) do
     values
     |> Enum.reverse()
-    |> Enum.reduce_while({:ok, []}, fn value, {:ok, mapped_values} ->
-      case Type.coerce(element_type, value) do
-        {:ok, mapped_value} ->
-          {:cont, {:ok, [mapped_value | mapped_values]}}
+    |> Enum.reduce_while({:ok, []}, fn element, {:ok, values} ->
+      case Type.coerce(element, element_type) do
+        {:ok, element} ->
+          {:cont, {:ok, [element | values]}}
 
         :error ->
           {:halt, :error}
@@ -24,5 +24,9 @@ defmodule Deparam.Types.Array do
     end)
   end
 
-  def coerce(_values, _context), do: :error
+  def coerce(value, context) do
+    value
+    |> List.wrap()
+    |> coerce(context)
+  end
 end
