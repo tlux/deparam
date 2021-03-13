@@ -11,7 +11,7 @@ defmodule Deparam.TypeContext do
 
   @doc false
   @spec new(coercer) :: t
-  def new(coercer) do
+  def new(coercer) when is_function(coercer, 2) do
     %__MODULE__{coercer: coercer}
   end
 end
