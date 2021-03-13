@@ -267,7 +267,7 @@ defmodule Deparam.CoercerTest do
                :error
     end
 
-    test "function" do
+    test "arity-1 function" do
       coercer = fn
         "0" -> {:ok, nil}
         "1" -> {:ok, true}
@@ -281,6 +281,20 @@ defmodule Deparam.CoercerTest do
       assert Type.coerce("2", coercer) == {:ok, false}
       assert Type.coerce("3", coercer) == :error
       assert Type.coerce([], coercer) == :error
+    end
+
+    test "arity-2 function" do
+      coercer = fn
+        "blank", %{modifier: :non_empty} -> :error
+        str, _ -> {:ok, str}
+        _, _ -> :error
+      end
+
+      assert Type.coerce(nil, coercer) == {:ok, nil}
+      assert Type.coerce("blank", coercer) == {:ok, "blank"}
+      assert Type.coerce("blank", {:non_empty, coercer}) == :error
+      assert Type.coerce("present", coercer) == {:ok, "present"}
+      assert Type.coerce("present", {:non_empty, coercer}) == {:ok, "present"}
     end
 
     test "custom coercer" do

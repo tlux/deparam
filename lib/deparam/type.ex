@@ -23,19 +23,30 @@ defmodule Deparam.Type do
 
   @modifiers [:non_empty, :non_nil]
 
+  @type modifier :: :non_empty | :non_nil
+
+  @type type ::
+          nil
+          | atom
+          | module
+          | TypeContext.t()
+          | (any -> {:ok, any} | :error)
+          | (any, TypeContext.t() -> {:ok, any} | :error)
+
   @doc """
   Translates the given type specification to a type context that can be passed
   as argument to a coercer.
   """
-  @spec resolve(any) :: {:ok, TypeContext.t()} | :error
+  @spec resolve(type | {modifier, type} | tuple | nonempty_list) ::
+          {:ok, TypeContext.t()} | :error
   def resolve(nil), do: resolve(:any)
 
   def resolve(%TypeContext{} = context) do
     {:ok, context}
   end
 
-  def resolve({modifier, type}) when modifier in @modifiers do
-    with {:ok, context} <- resolve(type) do
+  def resolve({modifier, context_or_fun_or_type}) when modifier in @modifiers do
+    with {:ok, context} <- resolve(context_or_fun_or_type) do
       {:ok, %{context | modifier: modifier}}
     end
   end
@@ -46,8 +57,8 @@ defmodule Deparam.Type do
     |> resolve()
   end
 
-  def resolve([type | args]) do
-    with {:ok, context} <- resolve(type) do
+  def resolve([context_or_fun_or_type | args]) do
+    with {:ok, context} <- resolve(context_or_fun_or_type) do
       {:ok, %{context | args: args}}
     end
   end
@@ -56,10 +67,18 @@ defmodule Deparam.Type do
     mod = Map.get(@aliases, type, type)
 
     if Code.ensure_loaded?(mod) && function_exported?(mod, :coerce, 2) do
-      {:ok, %TypeContext{mod: mod}}
+      {:ok, TypeContext.new(&mod.coerce/2)}
     else
       :error
     end
+  end
+
+  def resolve(fun) when is_function(fun, 1) do
+    resolve(fn value, _context -> fun.(value) end)
+  end
+
+  def resolve(fun) when is_function(fun, 2) do
+    {:ok, TypeContext.new(fun)}
   end
 
   def resolve(_), do: :error
@@ -83,6 +102,6 @@ defmodule Deparam.Type do
   defp do_coerce(nil, _), do: {:ok, nil}
 
   defp do_coerce(value, context) do
-    context.mod.coerce(value, context)
+    context.coercer.(value, context)
   end
 end
