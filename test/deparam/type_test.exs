@@ -103,38 +103,32 @@ defmodule Deparam.CoercerTest do
 
     test "map" do
       assert Type.coerce(
-               %{
-                 :foo => 666,
-                 "bar" => "1337",
-                 "baz" => nil
-               },
+               %{:foo => 666, "bar" => "1337", "baz" => nil},
+               :map
+             ) == {:ok, %{:foo => 666, "bar" => "1337", "baz" => nil}}
+
+      assert Type.coerce(
+               %{:foo => 666, "bar" => "1337", "baz" => nil},
+               {:map, :string}
+             ) == :error
+
+      assert Type.coerce(
+               %{:foo => 666, "bar" => "1337", "baz" => nil},
                {:map, :string, :string}
              ) == {:ok, %{"foo" => "666", "bar" => "1337", "baz" => nil}}
 
       assert Type.coerce(
-               %{
-                 :foo => 666,
-                 "bar" => "1337",
-                 "baz" => nil
-               },
+               %{:foo => 666, "bar" => "1337", "baz" => nil},
                {:map, :string, :integer}
              ) == {:ok, %{"foo" => 666, "bar" => 1337, "baz" => nil}}
 
       assert Type.coerce(
-               %{
-                 "1" => 666,
-                 "2" => "foo",
-                 3 => :bar
-               },
+               %{"1" => 666, "2" => "foo", 3 => :bar},
                {:map, :integer, :any}
              ) == {:ok, %{1 => 666, 2 => "foo", 3 => :bar}}
 
       assert Type.coerce(
-               %{
-                 :foo => 666,
-                 "bar" => "foo",
-                 "baz" => nil
-               },
+               %{:foo => 666, "bar" => "foo", "baz" => nil},
                {:map, :string, :integer}
              ) == :error
 
