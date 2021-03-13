@@ -30,6 +30,8 @@ defmodule Deparam.Type do
           nil
           | atom
           | module
+          | tuple
+          | nonempty_list
           | TypeContext.t()
           | (any -> {:ok, any} | :error)
           | (any, TypeContext.t() -> {:ok, any} | :error)
@@ -38,7 +40,7 @@ defmodule Deparam.Type do
   Translates the given type specification to a type context that can be passed
   as argument to a coercer.
   """
-  @spec resolve(type | {modifier, type} | tuple | nonempty_list) ::
+  @spec resolve(type | {modifier, type}) ::
           {:ok, TypeContext.t()} | :error
   def resolve(nil), do: resolve(:any)
 
