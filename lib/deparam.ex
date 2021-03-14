@@ -3,9 +3,9 @@ defmodule Deparam do
   A generic parameter parser and coercer.
   """
 
-  alias Deparam.Coercer
   alias Deparam.DeepMapGet
   alias Deparam.InvalidParamError
+  alias Deparam.Type
 
   @typedoc """
   A type describing a parameter collection.
@@ -117,7 +117,7 @@ defmodule Deparam do
     path = resolve_path(key_or_path)
     value = DeepMapGet.deep_map_get(params, path)
 
-    case Coercer.coerce(value, type) do
+    case Type.coerce(value, type) do
       {:ok, nil} ->
         {:ok, opts[:default]}
 
