@@ -1,10 +1,10 @@
-defmodule DeparamTest do
+defmodule Deparam.ParamsTest do
   use ExUnit.Case, async: true
 
-  alias Deparam
   alias Deparam.InvalidParamError
+  alias Deparam.Params
 
-  doctest Deparam
+  doctest Deparam.Params
 
   @valid_params %{
     "foo" => "bar",
@@ -12,13 +12,13 @@ defmodule DeparamTest do
     "baz" => nil
   }
 
-  describe "normalize_params/1" do
+  describe "normalize/1" do
     test "map with string keys" do
-      assert Deparam.normalize(@valid_params) == @valid_params
+      assert Params.normalize(@valid_params) == @valid_params
     end
 
     test "map with atom keys" do
-      assert Deparam.normalize(%{
+      assert Params.normalize(%{
                foo: "bar",
                bar: %{baz: "1337"},
                baz: nil
@@ -26,13 +26,13 @@ defmodule DeparamTest do
     end
 
     test "keyword list" do
-      assert Deparam.normalize(
+      assert Params.normalize(
                foo: "bar",
                bar: %{baz: "1337"},
                baz: nil
              ) == @valid_params
 
-      assert Deparam.normalize(
+      assert Params.normalize(
                foo: "bar",
                bar: [baz: "1337"],
                baz: nil,
@@ -47,67 +47,67 @@ defmodule DeparamTest do
 
     test "invalid" do
       assert_raise FunctionClauseError, fn ->
-        Deparam.normalize("1337")
+        Params.normalize("1337")
       end
 
       assert_raise ArgumentError,
                    "value must be a map with string or atom keys or a keyword list",
                    fn ->
-                     Deparam.normalize(%{1 => "test"})
+                     Params.normalize(%{1 => "test"})
                    end
 
       assert_raise ArgumentError,
                    "value must be a map with string or atom keys or a keyword list",
                    fn ->
-                     Deparam.normalize([{"test", "test", "test"}])
+                     Params.normalize([{"test", "test", "test"}])
                    end
     end
   end
 
   describe "get/4" do
     test "get value" do
-      assert Deparam.get(@valid_params, :foo, :any, []) == "bar"
+      assert Params.get(@valid_params, :foo, :any, []) == "bar"
 
-      assert Deparam.get(@valid_params, [:bar, "baz"], :integer, []) ==
+      assert Params.get(@valid_params, [:bar, "baz"], :integer, []) ==
                1337
     end
 
     test "default value" do
-      assert Deparam.get(@valid_params, :foo, :integer, []) == nil
+      assert Params.get(@valid_params, :foo, :integer, []) == nil
 
-      assert Deparam.get(@valid_params, :foo, :integer, default: :foo) ==
+      assert Params.get(@valid_params, :foo, :integer, default: :foo) ==
                :foo
     end
   end
 
-  describe "fetch_param/2" do
+  describe "fetch/2" do
     test "fetch value" do
-      assert Deparam.fetch(@valid_params, :foo) ==
-               Deparam.fetch(@valid_params, :foo, :any, [])
+      assert Params.fetch(@valid_params, :foo) ==
+               Params.fetch(@valid_params, :foo, :any, [])
     end
   end
 
-  describe "fetch_param/4" do
+  describe "fetch/4" do
     test "fetch value" do
-      assert Deparam.fetch(@valid_params, :foo, :any, []) == {:ok, "bar"}
+      assert Params.fetch(@valid_params, :foo, :any, []) == {:ok, "bar"}
 
-      assert Deparam.fetch(@valid_params, [:bar, "baz"], :any, []) ==
+      assert Params.fetch(@valid_params, [:bar, "baz"], :any, []) ==
                {:ok, "1337"}
 
-      assert Deparam.fetch(@valid_params, [:foo, "baz"], :any, []) ==
+      assert Params.fetch(@valid_params, [:foo, "baz"], :any, []) ==
                {:ok, nil}
     end
 
     test "default value" do
-      assert Deparam.fetch(@valid_params, [:bar, "baz"], :any, default: :foo) ==
+      assert Params.fetch(@valid_params, [:bar, "baz"], :any, default: :foo) ==
                {:ok, "1337"}
 
-      assert Deparam.fetch(@valid_params, [:foo, "baz"], :any, default: :foo) ==
+      assert Params.fetch(@valid_params, [:foo, "baz"], :any, default: :foo) ==
                {:ok, :foo}
     end
 
     test "invalid" do
-      assert Deparam.fetch(
+      assert Params.fetch(
                @valid_params,
                [:foo, "baz"],
                {:non_empty, :any}
@@ -121,7 +121,7 @@ defmodule DeparamTest do
     end
 
     test "coerce" do
-      assert Deparam.fetch(@valid_params, [:bar, "baz"], :integer, []) ==
+      assert Params.fetch(@valid_params, [:bar, "baz"], :integer, []) ==
                {:ok, 1337}
     end
   end

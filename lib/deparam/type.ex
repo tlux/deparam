@@ -6,6 +6,10 @@ defmodule Deparam.Type do
   alias Deparam.TypeContext
   alias Deparam.Types
 
+  @doc """
+  Coerces the given value using the type and additional options specified in the
+  specified type context.
+  """
   @callback coerce(value :: any, context :: TypeContext.t()) ::
               {:ok, any} | :error
 
@@ -27,7 +31,7 @@ defmodule Deparam.Type do
 
   @type modifier :: :non_empty | :non_nil
 
-  @type type ::
+  @type primitive ::
           nil
           | atom
           | module
@@ -37,12 +41,13 @@ defmodule Deparam.Type do
           | (any -> {:ok, any} | :error)
           | (any, TypeContext.t() -> {:ok, any} | :error)
 
+  @type type :: primitive | {modifier, primitive}
+
   @doc """
   Translates the given type specification to a type context that can be passed
   as argument to a coercer.
   """
-  @spec resolve(type | {modifier, type}) ::
-          {:ok, TypeContext.t()} | :error
+  @spec resolve(type) :: {:ok, TypeContext.t()} | :error
   def resolve(nil), do: resolve(:any)
 
   def resolve(%TypeContext{} = context) do
@@ -90,7 +95,7 @@ defmodule Deparam.Type do
   @doc """
   Coerces the given value using the given type context or specification.
   """
-  @spec coerce(any, any) :: {:ok, any} | :error
+  @spec coerce(any, type) :: {:ok, any} | :error
   def coerce(value, type) do
     with {:ok, context} <- resolve(type),
          {:ok, value} <- do_coerce(value, context) do
@@ -103,7 +108,7 @@ defmodule Deparam.Type do
     :error
   end
 
-  defp do_coerce(nil, _), do: {:ok, nil}
+  defp do_coerce(nil, _context), do: {:ok, nil}
 
   defp do_coerce(value, context) do
     context.coercer.(value, context)

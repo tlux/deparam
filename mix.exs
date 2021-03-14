@@ -15,7 +15,32 @@ defmodule Deparam.MixProject do
         "coveralls.post": :test,
         "coveralls.html": :test
       ],
-      test_coverage: [tool: ExCoveralls]
+      test_coverage: [tool: ExCoveralls],
+      dialyzer: [plt_add_apps: [:ex_unit, :mix]],
+      package: package(),
+
+      # Docs
+      name: "Deparam",
+      source_url: "https://github.com/tlux/deparam",
+      docs: [
+        main: "Deparam",
+        extras: ["README.md"],
+        groups_for_modules: [
+          Types: [
+            Deparam.Types.Any,
+            Deparam.Types.Array,
+            Deparam.Types.Boolean,
+            Deparam.Types.Enum,
+            Deparam.Types.Float,
+            Deparam.Types.Integer,
+            Deparam.Types.Map,
+            Deparam.Types.String,
+            Deparam.Types.Upload,
+            Deparam.Types.URL,
+            Deparam.Types.WordList
+          ]
+        ]
+      ]
     ]
   end
 
@@ -39,4 +64,13 @@ defmodule Deparam.MixProject do
 
   defp elixirc_paths(:test), do: ["test/support", "lib"]
   defp elixirc_paths(_env), do: ["lib"]
+
+  defp package do
+    [
+      licenses: ["MIT"],
+      links: %{
+        "GitHub" => "https://github.com/tlux/deparam"
+      }
+    ]
+  end
 end

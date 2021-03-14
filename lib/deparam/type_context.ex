@@ -1,4 +1,9 @@
 defmodule Deparam.TypeContext do
+  @moduledoc """
+  A context struct that is passed to a module implementing the `Deparam.Type`
+  behavior.
+  """
+
   defstruct [:coercer, modifier: nil, args: []]
 
   @type coercer :: (any, t -> {:ok, any} | :error)
