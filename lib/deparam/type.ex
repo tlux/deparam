@@ -29,7 +29,7 @@ defmodule Deparam.Type do
 
   @modifiers [:non_empty, :non_nil]
 
-  @type modifier :: :non_empty | :non_nil
+  @type modifier :: nil | :non_empty | :non_nil
 
   @type primitive ::
           nil

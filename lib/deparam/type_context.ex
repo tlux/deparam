@@ -10,7 +10,7 @@ defmodule Deparam.TypeContext do
 
   @type t :: %__MODULE__{
           coercer: coercer,
-          modifier: nil | :non_nil | :non_empty,
+          modifier: Deparam.Type.modifier(),
           args: [any]
         }
 
